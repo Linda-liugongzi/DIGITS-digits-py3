@@ -7,7 +7,6 @@ import json
 import platform
 import traceback
 import os
-import time
 
 
 import flask
@@ -385,8 +384,8 @@ def register():
             error = '两次密码不相同！'
         elif valid_regist(request.form['username']):
             password = hashlib.md5(request.form['password'].encode()).hexdigest()
-            last_login = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-            user = User(username=request.form['username'], password_hash=password, status="T",last_login = last_login)
+            create_time = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+            user = User(username=request.form['username'], password_hash=password, status="T",create_time = create_time)
             db.session.add(user)
             db.session.commit()
 

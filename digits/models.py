@@ -7,14 +7,16 @@ import hashlib
 class User(db.Model):
     DEFAULT_PERMISSIONS = '0'
     DEFAULT_STATUS = 'T'
+    DEFAULT_LAST_LOGIN= "无"
+    DEFAULT_MODIFY_TIME = "无"
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(320), unique=True)
     password_hash = db.Column(db.String(128), nullable=True)
-    # permissions = db.Column(postgresql.ARRAY(db.String(255)), default=DEFAULT_PERMISSIONS)
     permissions = db.Column(db.String(128), default=DEFAULT_PERMISSIONS)
     status = db.Column(db.String(128), default=DEFAULT_STATUS)
-    last_login = db.Column(db.String(128), nullable=True)
-
+    last_login = db.Column(db.String(128), default = DEFAULT_LAST_LOGIN)
+    create_time = db.Column(db.String(128),nullable=False)
+    modify_time = db.Column(db.String(128),default= DEFAULT_MODIFY_TIME)
     __tablename__ = 'users'
 
     def __repr__(self):
@@ -23,6 +25,13 @@ class User(db.Model):
     @staticmethod
     def get_all_users():
         return User.query.filter().order_by(User.id).all()
+
+
+    @staticmethod
+    def get_filter_users(condition):
+        return User.query.filter(
+                                condition
+                                ).order_by(User.id).all()
 
     @staticmethod
     def inspect_username(username):

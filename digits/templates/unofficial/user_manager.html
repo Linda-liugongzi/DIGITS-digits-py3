@@ -41,20 +41,46 @@
         }
          #modify-user-dialog{
              width: 400px;
+             position: absolute;
+             z-index: 999999;
+             background: #ffffff;
+             top: 50%;
+             left: 50%;
+             margin-left: -200px;
+             margin-top: -200px;
+             box-shadow: 7px 15px 30px #285a63;
+             border: 1px solid transparent;
+             border-radius: 4px;
+             display:none;
+         }
+        #select-user-dialog{
+             width: 400px;
+             position: absolute;
+             z-index: 999999;
+             background: #ffffff;
+             top: 50%;
+             left: 50%;
+             margin-left: -200px;
+             margin-top: -200px;
+             box-shadow: 7px 15px 30px #285a63;
+             border: 1px solid transparent;
+             border-radius: 4px;
+             display:none;
+         }
+        #delete_confirm{
+            width: 400px;
             position: absolute;
             z-index: 999999;
             background: #ffffff;
             top: 50%;
             left: 50%;
             margin-left: -200px;
-            margin-top: -200px;
+            margin-top: -150px;
             box-shadow: 7px 15px 30px #285a63;
             border: 1px solid transparent;
             border-radius: 4px;
-             display:none;
-         }
-    {#input[readonly]{#}
-    {#background-color: red;#}
+            display:none;
+        }
 
     </style>
 {% endblock %}
@@ -70,7 +96,63 @@
     {{ print_flashes() }}
     <div>
     <h3>用户与权限管理</h3>
-    <div id="add-user-dialog" style="display: none;">
+        <div id = "delete_confirm" style="display: none;">
+            <form action="{{ url_for('digits.unofficial.views.del_user') }}" method="post" class="panel panel-default modalBody" id= "form1" style="margin-bottom: 0">
+                <div class="panel-heading text-center">
+                    <span style="font-size:20px;">友情提示：</span>
+                </div>
+                <input type="text" class="form-control" id="delname" name="delname" style="display: none;">
+                <div class="panel-body text-center">
+                    删除后数据将无法恢复，您确定要删除<span style="font-size:15px;color: red" id = 'span1'></span>用户吗？
+                </div>
+                <div class="panel-footer text-center">
+                    <a class="btn btn-primary" id = "real_del" >确认</a>
+                    <a class="btn btn-primary" id="close_del" >取消</a>
+                </div>
+            </form>
+        </div>
+        <div id="select-user-dialog" style="display: none;">
+        <form action="{{ url_for('digits.unofficial.views.select_user') }}" method="post" class="panel panel-default modalBody" style="margin-bottom: 0">
+            <div class="panel-heading text-center">
+                <span style="font-size:24px;">查询用户</span>
+                <a class="btn btn-danger btn-xs closeButton" style="float: right;" id="close-select-user">
+                    <span class="glyphicon glyphicon-remove"></span>
+                </a>
+                </div>
+                <div class="" style="top: -10px; position: relative; padding: 10px 20px;">
+                    <div class="row" style="margin:10px 30px 0 30px;">
+                        <div class="form-group">
+                            <label for="seluser_name" class="control-label">用户名</label>
+                            <input type="text" class="form-control " id="seluser_name" name="seluser_name">
+                        </div>
+                    </div>
+                    <div class="row" style="margin:0 30px">
+                        <div class="form-group">
+                            <label for="seluser_perm" class="control-label">权限</label>
+                            <select class="form-control" name="seluser_perm" id="seluser_perm" autocomplete="off">
+                                <option value="4">全部</option>
+                                <option value="0">{{ permiss[0] }}</option>
+                                <option value="1">{{ permiss[1] }}</option>
+                                <option value="2">{{ permiss[2] }}</option>
+                                <option value="3">{{ permiss[3] }}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row" style="margin:0 30px">
+                        <div class="form-group">
+                            <label for="seluser_status" class="control-label">状态</label>
+                            <select class="form-control" name="seluser_status" id="seluser_status" autocomplete="off">
+                                <option value="N">全部</option>
+                                <option value="T">禁用</option>
+                                <option value="F">启用</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" style="display:block;margin:0 auto">查询</button>
+                </div>
+            </form>
+        </div>
+        <div id="add-user-dialog" style="display: none;">
             <form action="{{ url_for('digits.unofficial.views.add_user') }}" method="post" class="panel panel-default modalBody" style="margin-bottom: 0">
                 <div class="panel-heading text-center">
                     <span style="font-size:24px;">添加用户</span>
@@ -81,7 +163,7 @@
                 <div class="" style="top: -10px; position: relative; padding: 10px 20px;">
                     <div class="row" style="margin:10px 30px 0 30px;">
                         <div class="form-group">
-                            <label for="username" class="control-label">用户名</label>
+                            <label for="username" class="control-label">用户名</label><span class="required" style="color:red;font-size:14px;">*</span>
                             <input type="text" class="form-control" id="username" name="username" autofocus required>
                         </div>
                     </div>
@@ -98,7 +180,7 @@
                     </div>
                     <div class="row" style="margin:0 30px">
                         <div class="form-group">
-                            <label for="upassword" class="control-label">密码</label>
+                            <label for="upassword" class="control-label">密码</label><span class="required" style="color:red;font-size:14px">*</span>
                             <input type="password" class="form-control" id="upassword" name="upassword" required>
                         </div>
                     </div>
@@ -106,8 +188,7 @@
                 </div>
             </form>
         </div>
-    
-    <div id="modify-user-dialog" style="display: none;">
+        <div id="modify-user-dialog" style="display: none;">
         <form action="{{ url_for('digits.unofficial.views.modify_user') }}" method="post" class="panel panel-default modalBody" style="margin-bottom: 0">
             <div class="panel-heading text-center">
                 <span style="font-size:24px;">修改用户</span>
@@ -151,9 +232,9 @@
                     <button class="btn btn-primary" style="display:block;margin:0 auto">保存</button>
                 </div>
             </form>
-     </div>
+        </div>
     <a class="btn btn-success btn-sm" id="create_user" style="float:right" >添加用户</a>
-
+    <a class="btn btn-success btn-sm" id="select_user" style="float:left" >查询用户</a>
 
     <hr>
     <table class="table table-bordered table-striped list-group selectable"
@@ -165,43 +246,57 @@
                 <th>用户名</th>
                 <th>权限</th>
                 <th>状态</th>
+                <th>创建时间</th>
+                <th>最后修改时间</th>
                 <th>最后登录时间</th>
                 <th>操作</th>
             </tr>
         </thead>
         <tbody>
-        {% for user in users %}
-            <tr>
-                <td>{{ user.id }}</td>
-                <td><a href="#">{{ user.username }}</a> </td>
-                <td>
-                    {% for per in user.permissions %}
-                        {{ permiss[int(per)]}}
-                        {% set perm = permiss[int(per)] %}
-                    {% endfor %}
-                </td>
-                <td>
-                    {% if user.status == 'T' %}
-                        禁用
-                    {% elif user.status == 'F' %}
-                        启用
-                    {% endif %}
-                </td>
-                <td>
-                    {{ user.last_login }}
-                </td>
-                <td>
-                    {% for perm in user.permissions %}
-                        <a class="btn btn-primary btn-edit" id = '{{ user.id}}' onclick="f('{{ user.id}}', '{{user.username}}','{{ user.status }}','{{ perm }}')">
-                            <i class="fa fa-edit"></i> 修改
+        {%if users%}
+            {% for user in users %}
+                <tr>
+                    <td>{{ user.id }}</td>
+                    <td><a href="#">{{ user.username }}</a> </td>
+                    <td>
+                        {% for per in user.permissions %}
+                            {{ permiss[int(per)]}}
+                            {% set perm = permiss[int(per)] %}
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {% if user.status == 'T' %}
+                            禁用
+                        {% elif user.status == 'F' %}
+                            启用
+                        {% endif %}
+                    </td>
+                    <td>
+                        {{ user.create_time }}
+                    </td>
+                    <td>
+                        {{ user.modify_time }}
+                    </td>
+                    <td>
+                        {{ user.last_login }}
+                    </td>
+                    <td>
+                        {% for perm in user.permissions %}
+                            <a class="btn btn-primary btn-sm" id = '{{ user.id}}' onclick="f('{{ user.id}}', '{{user.username}}','{{ user.status }}','{{ perm }}')">
+                                修改
+                            </a>
+                        {% endfor %}
+                        <a class="btn btn-danger btn-sm btn-del" onclick="del('{{user.username}}')">
+                                删除
                         </a>
-                    {% endfor %}
-                    <a class="btn btn-danger btn-del btn-del delUser" href='{{ url_for("digits.unofficial.views.del_user",del_user_name=user.username) }}' onClick="return confirm('删除后将无法恢复,确定要删除?')">
-                        <i class="fa fa-remove"></i> 删除
-                    </a>
-                </td>
+                    </td>
+                </tr>
+            {% endfor %}
+        {% else %}
+            <tr>
+                <td colspan="8" align="left">对不起,暂无信息显示!</td>
             </tr>
-        {% endfor %}
+        {% endif %}
         </tbody>
     </table>
     </div>
@@ -221,7 +316,8 @@
                 <th>名称</th>
                 <th>ID</th>
                 <th>日志</th>
-{#                <th>操作</th>#}
+                <th>创建时间</th>
+                <th>操作</th>
             </tr>
         </thead>
         <tbody>
@@ -233,7 +329,8 @@
                 <td>{{ dataset_job['name'] }}</td>
                 <td><a href="{{ url_for('digits.dataset.views.show', job_id=dataset_job['id']) }}">{{ dataset_job['id'] }}</a> </td>
                 {{ gen_dataset_log_path(dataset_job['id']) }}
-{#                <td><a id="delete-job" class="btn btn-danger btn-xs" href="#">删除</a></td>#}
+                <td>"aa"</td>
+                <td>"bb"</td>
             </tr>
             {% set count.value = count.value + 1 %}
         {% endfor %}
@@ -244,7 +341,8 @@
                 <td>{{ model_job['name'] }}</td>
                 <td><a href="{{ url_for('digits.model.views.show', job_id=model_job['id']) }}">{{ model_job['id'] }}</a> </td>
                 {{ gen_model_log_path(model_job['id']) }}
-{#                {{ delete_job(model_job['id']) }}#}
+                <td>"cc"</td>
+                <td>"dd"</td>
             </tr>
             {% set count.value = count.value + 1 %}
         {% endfor %}
@@ -252,8 +350,6 @@
     </table>
     </div>
  <script>
-
-
         function f(user_id,user_name,user_status,user_perm){
             $(".idclass").attr("value",user_id);
             $(".nameclass").attr("value",user_name);
@@ -276,10 +372,12 @@
             }
             $('#modify-user-dialog')[0].style.display = 'block';
             };
-
+        function del(user_name){
+            $('#delname').attr('value',user_name);
+            $('#span1').html(user_name);
+            $('#delete_confirm')[0].style.display = 'block';
+        }
         $(function(){
-
-            var modUser={};
             $('#create_user').click(
             function () {
                 $('#add-user-dialog')[0].style.display = 'block';
@@ -290,13 +388,31 @@
                     $('#add-user-dialog')[0].style.display = 'none';
                 }
             );
-
             $('#close-modify-user').click(
                 function () {
                     $('#modify-user-dialog')[0].style.display = 'none';
                 }
             );
-
+            $('#real_del').click(
+                function () {
+                    $('#form1').submit();
+                }
+            );
+            $('#close_del').click(
+                function () {
+                    $('#delete_confirm')[0].style.display = 'none';
+                }
+            );
+            $('#select_user').click(
+                function(){
+                    $('#select-user-dialog')[0].style.display = 'block';
+                }
+            );
+            $('#close-select-user').click(
+                function(){
+                    $('#select-user-dialog')[0].style.display = 'none';
+                }
+            );
         });
     </script>
 {% endblock %}

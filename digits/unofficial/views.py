@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
+from operator import and_
+
 
 import os
 import flask
 from flask import request, flash, session, redirect, render_template, url_for
 import hashlib
+import datetime
 
 from digits.config import config_value
 from digits.webapp import app, socketio, scheduler, db
@@ -139,7 +142,8 @@ def add_user():
     if User.inspect_username(username):
         permissions = request.form.get('permissions')
         password = hashlib.md5(request.form.get('upassword').encode()).hexdigest()
-        user = User(username=username, password_hash=password, permissions=permissions, status="T")
+        create_time = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        user = User(username=username, password_hash=password, permissions=permissions, status="T",create_time = create_time)
         db.session.add(user)
         db.session.commit()
     else:
@@ -153,20 +157,54 @@ def modify_user():
     old_user = User.query.filter(User.username == username).first()
     permissions = request.form.get('modUser_perm')
     status = request.form.get('is_jinyong')
-
+    modify_time = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     old_user.permissions = permissions
     old_user.status = status
+    old_user.modify_time = modify_time
     db.session.commit()
     return redirect(url_for('digits.unofficial.views.system_manager'))
 
 
-@blueprint.route("/del_user/<del_user_name>",methods = ['GET','POST'])
-def del_user(del_user_name):
-    # username = request.args['delUserName']
-    username = del_user_name
-    print(username)
+@blueprint.route("/del_user",methods = ['POST'])
+def del_user():
+    username = request.form.get('delname')
     old_user = User.query.filter(User.username == username).first()
     db.session.delete(old_user)
     db.session.commit()
     return redirect(url_for('digits.unofficial.views.system_manager'))
+
+
+@blueprint.route("/select_user",methods = ['POST'])
+def select_user():
+    running_datasets = get_job_list(dataset.DatasetJob, True)
+    completed_datasets = get_job_list(dataset.DatasetJob, False)
+    running_models = get_job_list(model.ModelJob, True)
+    completed_models = get_job_list(model.ModelJob, False)
+    job_data = {
+        'datasets': [j.json_dict(True)
+                     for j in running_datasets + completed_datasets],
+        'models': [j.json_dict(True)
+                   for j in running_models + completed_models],
+    }
+    ##多个过滤
+    condition = (User.id > 0)
+    user_name = request.form.get("seluser_name")
+    if user_name:
+        condition = and_(condition, User.username.like(str(user_name)+'%'))
+    user_perm = request.form.get("seluser_perm")
+    if user_perm in ["0","1","2","3"]:
+        condition = and_(condition, User.permissions == user_perm)
+    user_status = request.form.get("seluser_status")
+    if user_status in ["T","F"]:
+        condition = and_(condition, User.status == user_status)
+    users = User.get_filter_users(condition)
+    return render_template('unofficial/user_manager.html',
+                               users=users,
+                               job_data=job_data,
+                               scheduler=scheduler,
+                               enumerate=enumerate,
+                               int=int)
+
+
+
 
